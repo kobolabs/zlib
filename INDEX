@@ -20,6 +20,7 @@ alpha/          files for the alpha platform
 amiga/          makefiles for Amiga SAS C
 arm/            files for the arm platform
 as400/		makefiles for AS/400
+bfin/           files for the bfin platform
 doc/            documentation for formats and algorithms
 mips/           files for the mips platform
 msdos/          makefiles for MSDOS
