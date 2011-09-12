@@ -81,6 +81,12 @@ local int host_is_bigendian()
     return x.endian[0] == 0;
 }
 
+#ifndef NO_ADLER32_VEC
+#  if defined(__powerpc__) || defined(__powerpc64__)
+#    include "ppc/adler32.c"
+#  endif
+#endif
+
 #ifndef MIN_WORK
 #  define MIN_WORK 16
 #endif
