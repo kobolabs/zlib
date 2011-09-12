@@ -21,6 +21,7 @@ amiga/          makefiles for Amiga SAS C
 arm/            files for the arm platform
 as400/		makefiles for AS/400
 doc/            documentation for formats and algorithms
+mips/           files for the mips platform
 msdos/          makefiles for MSDOS
 nintendods/     makefile for Nintendo DS
 old/            makefiles for various architectures and zlib documentation
