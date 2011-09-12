@@ -28,6 +28,7 @@ ppc/            files for the ppc platform
 qnx/            makefiles for QNX
 watcom/         makefiles for OpenWatcom
 win32/          makefiles for Windows
+x86/            files for the x86 platform
 
                 zlib public header files (required for library use):
 zconf.h
