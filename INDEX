@@ -30,6 +30,7 @@ old/            makefiles for various architectures and zlib documentation
                 files that have not yet been updated for zlib 1.2.x
 ppc/            files for the ppc platform
 qnx/            makefiles for QNX
+sparc/          files for the sparc platform
 watcom/         makefiles for OpenWatcom
 win32/          makefiles for Windows
 x86/            files for the x86 platform

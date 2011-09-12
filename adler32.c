@@ -110,6 +110,8 @@ local int host_is_bigendian()
 #    include "mips/adler32.c"
 #  elif defined(__powerpc__) || defined(__powerpc64__)
 #    include "ppc/adler32.c"
+#  elif defined(__sparc) || defined(__sparc__)
+#    include "sparc/adler32.c"
 #  elif defined(__i386__) || defined(__x86_64__)
 #    include "x86/adler32.c"
 #  endif
