@@ -84,6 +84,8 @@ local int host_is_bigendian()
 #ifndef NO_ADLER32_VEC
 #  if defined(__arm__)
 #    include "arm/adler32.c"
+#  elif defined(__alpha__)
+#    include "alpha/adler32.c"
 #  elif defined(__powerpc__) || defined(__powerpc64__)
 #    include "ppc/adler32.c"
 #  elif defined(__i386__) || defined(__x86_64__)

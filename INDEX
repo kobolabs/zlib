@@ -16,6 +16,7 @@ zlib.map        Linux symbol information
 zlib.pc.in      Template for pkg-config descriptor
 zlib2ansi       perl script to convert source files for C++ compilation
 
+alpha/          files for the alpha platform
 amiga/          makefiles for Amiga SAS C
 arm/            files for the arm platform
 as400/		makefiles for AS/400
