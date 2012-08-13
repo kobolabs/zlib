@@ -2,7 +2,7 @@
  * adler32.c -- compute the Adler-32 checksum of a data stream
  *   x86 implementation
  * Copyright (C) 1995-2007 Mark Adler
- * Copyright (C) 2009-2011 Jan Seiffert
+ * Copyright (C) 2009-2012 Jan Seiffert
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -405,17 +405,27 @@ local uLong adler32_SSSE3(adler, buf, len)
             ".previous\n\t"
 #  endif
             ".p2align 2\n"
-            "3:\n\t"
-            "pxor	%%xmm7, %%xmm7\n\t"	/* zero vs1_round_sum */
-            ".p2align 3,,3\n\t"
-            ".p2align 2\n"
-            "2:\n\t"
+            "6:\n\t"
             "mov	$128, %1\n\t"		/* inner_k = 128 bytes till vs2_i overflows */
             "cmp	%1, %3\n\t"
             "cmovb	%3, %1\n\t"		/* inner_k = k >= inner_k ? inner_k : k */
             "and	$-16, %1\n\t"		/* inner_k = ROUND_TO(inner_k, 16) */
             "sub	%1, %3\n\t"		/* k -= inner_k */
             "shr	$4, %1\n\t"		/* inner_k /= 16 */
+            "mov	$1, %5\n\t"		/* outer_k = 1 */
+            "jmp	5f\n"			/* goto loop start */
+            "3:\n\t"
+            "pxor	%%xmm7, %%xmm7\n\t"	/* zero vs1_round_sum */
+            "mov	%3, %5\n\t"		/* determine full inner_k (==8) rounds from k */
+            "and	$-128, %5\n\t"		/* outer_k = ROUND_TO(outer_k, 128) */
+            "sub	%5, %3\n\t"		/* k -= outer_k */
+            "shr	$7, %5\n\t"		/* outer_k /= 128 */
+            "jz         6b\n\t"			/* if outer_k == 0 handle trailer */
+            ".p2align 3,,3\n\t"
+            ".p2align 2\n"
+            "2:\n\t"
+            "mov	$8, %1\n"		/* inner_k = 8 */
+            "5:\n\t"
             "pxor	%%xmm6, %%xmm6\n\t"	/* zero vs2_i */
             ".p2align 4,,7\n"
             ".p2align 3\n"
@@ -436,8 +446,10 @@ local uLong adler32_SSSE3(adler, buf, len)
             "punpcklwd	%%xmm4, %%xmm6\n\t"	/* zero extent vs2_i lower words to dwords */
             "paddd	%%xmm0, %%xmm2\n\t"	/* vs2 += vs2_i.upper */
             "paddd	%%xmm6, %%xmm2\n\t"	/* vs2 += vs2_i.lower */
+            "dec	%5\n\t"			/* decrement outer_k  */
+            "jnz	2b\n\t"			/* repeat with inner_k = 8 if outer_k != 0 */
             "cmp	$15, %3\n\t"
-            "jg	2b\n\t"				/* if(k > 15) repeat */
+            "ja	6b\n\t"				/* if(k > 15) repeat */
             "movdqa	%%xmm7, %%xmm0\n\t"	/* move vs1_round_sum */
             "call	sse2_chop\n\t"		/* chop vs1_round_sum */
             "pslld	$4, %%xmm0\n\t"		/* vs1_round_sum *= 16 */
@@ -454,7 +466,7 @@ local uLong adler32_SSSE3(adler, buf, len)
             "cmovb	%4, %3\n\t"		/* k = len >= VNMAX ? k : len */
             "sub	%3, %4\n\t"		/* len -= k */
             "cmp	$15, %3\n\t"
-            "jg	3b\n\t"				/* if(k > 15) repeat */
+            "ja	3b\n\t"				/* if(k > 15) repeat */
             "test	%k3, %k3\n\t"		/* test for 0 */
             "jz	5f\n\t"				/* if (k == 0) goto OUT */
             "movdqa	(%0), %%xmm0\n\t"	/* fetch remaining input data as first arg */
