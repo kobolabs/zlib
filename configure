@@ -183,7 +183,7 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
     uname=`(uname -s || echo unknown) 2>/dev/null`
   fi
   case "$uname" in
-  Linux* | linux* | GNU | GNU/* | solaris*)
+  Darwin* | darwin* | Linux* | linux* | GNU | GNU/* | solaris*)
         LDSHARED=${LDSHARED-"$cc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map"} ;;
   *BSD | *bsd* | DragonFly)
         LDSHARED=${LDSHARED-"$cc -shared -Wl,-soname,libz.so.1,--version-script,zlib.map"}
@@ -211,18 +211,6 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
                  shared_ext='.sl'
                  SHAREDLIB='libz.sl' ;;
          esac ;;
-  Darwin* | darwin*)
-             shared_ext='.dylib'
-             SHAREDLIB=libz$shared_ext
-             SHAREDLIBV=libz.$VER$shared_ext
-             SHAREDLIBM=libz.$VER1$shared_ext
-             LDSHARED=${LDSHARED-"$cc -dynamiclib -install_name $libdir/$SHAREDLIBM -compatibility_version $VER1 -current_version $VER3"}
-             if libtool -V 2>&1 | grep Apple > /dev/null; then
-                 AR="libtool"
-             else
-                 AR="/usr/bin/libtool"
-             fi
-             ARFLAGS="-o" ;;
   *)             LDSHARED=${LDSHARED-"$cc -shared"} ;;
   esac
 else
@@ -373,24 +361,7 @@ fi
 echo >> configure.log
 
 # see if shared library build supported
-cat > $test.c <<EOF
-extern int getchar();
-int hello() {return getchar();}
-EOF
-if test $shared -eq 1; then
-  echo Checking for shared library support... | tee -a configure.log
-  # we must test in two steps (cc then ld), required at least on SunOS 4.x
-  if try $CC -w -c $SFLAGS $test.c &&
-     try $LDSHARED $SFLAGS -o $test$shared_ext $test.o; then
-    echo Building shared library $SHAREDLIBV with $CC. | tee -a configure.log
-  elif test -z "$old_cc" -a -z "$old_cflags"; then
-    echo No shared library support. | tee -a configure.log
-    shared=0;
-  else
-    echo 'No shared library support; try without defining CC and CFLAGS' | tee -a configure.log
-    shared=0;
-  fi
-fi
+shared=1
 if test $shared -eq 0; then
   LDSHARED="$CC"
   ALL="static"
@@ -756,13 +727,9 @@ int main() {
 }
 EOF
 Z_U4=""
-if try $CC $CFLAGS $test.c -o $test && Z_U4=`./$test` && test -n "$Z_U4"; then
   sed < zconf.h "/#define Z_U4/s/\/\* \.\/configure may/#define Z_U4 $Z_U4   \/* .\/configure put the/" > zconf.temp.h
   mv zconf.temp.h zconf.h
   echo "Looking for a four-byte integer type... Found." | tee -a configure.log
-else
-  echo "Looking for a four-byte integer type... Not found." | tee -a configure.log
-fi
 
 # show the results in the log
 echo >> configure.log
